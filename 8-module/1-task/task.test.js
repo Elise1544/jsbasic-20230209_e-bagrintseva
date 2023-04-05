@@ -2,15 +2,15 @@ import CartIcon from './index.js';
 import createElement from '../../assets/lib/create-element.js';
 
 describe('8-module-1-task', () => {
-  let cartIcon;
+	let cartIcon;
 
-  let cart;
+	let cart;
 
-  let styleElement;
-  let mainElements;
+	let styleElement;
+	let mainElements;
 
-  beforeEach(() => {
-    styleElement = createElement(`
+	beforeEach(() => {
+		styleElement = createElement(`
       <style>
         .container {
           max-width: 988px;
@@ -36,7 +36,7 @@ describe('8-module-1-task', () => {
         }
 
         .cart-icon__inner {
-          background: url("/assets/images/icons/cart-icon.svg") center no-repeat;
+          background: url("./assets/images/icons/cart-icon.svg") center no-repeat;
           background-size: cover;
           position: relative;
           width: 100%;
@@ -97,7 +97,7 @@ describe('8-module-1-task', () => {
       </style>
     `);
 
-    mainElements = createElement(`
+		mainElements = createElement(`
     <div style="height: 5000px;">
       <header class="header container">
         <h1 class="heading logo">Бангкок Экспресс</h1>
@@ -110,127 +110,119 @@ describe('8-module-1-task', () => {
     </div>
     `);
 
-    document.body.append(styleElement);
-    document.body.append(mainElements);
+		document.body.append(styleElement);
+		document.body.append(mainElements);
 
-    cart = jasmine.createSpyObj('cart', [
-      'isEmpty',
-      'getTotalCount',
-      'getTotalPrice',
-    ]);
+		cart = jasmine.createSpyObj('cart', ['isEmpty', 'getTotalCount', 'getTotalPrice']);
 
-    cartIcon = new CartIcon();
+		cartIcon = new CartIcon();
 
-    document.body.querySelector('[data-cart-icon-holder]').append(cartIcon.elem);
-  });
+		document.body.querySelector('[data-cart-icon-holder]').append(cartIcon.elem);
+	});
 
-  afterEach(() => {
-    mainElements.remove();
-    styleElement.remove();
-  });
+	afterEach(() => {
+		mainElements.remove();
+		styleElement.remove();
+	});
 
-  describe('если корзина не пустая', () => {
-    let cartIconElement;
+	describe('если корзина не пустая', () => {
+		let cartIconElement;
 
-    beforeEach(() => {
-      cart.isEmpty.and.returnValue(false);
-      cart.getTotalCount.and.returnValue(10);
-      cart.getTotalPrice.and.returnValue(100);
-      cartIconElement = document.body.querySelector('.cart-icon');
-    });
+		beforeEach(() => {
+			cart.isEmpty.and.returnValue(false);
+			cart.getTotalCount.and.returnValue(10);
+			cart.getTotalPrice.and.returnValue(100);
+			cartIconElement = document.body.querySelector('.cart-icon');
+		});
 
-    it('иконка корзины должна быть видимой на странице', () => {
-      cartIcon.update(cart);
+		it('иконка корзины должна быть видимой на странице', () => {
+			cartIcon.update(cart);
 
-      let isCartIconVisible = cartIcon.elem.classList.contains('cart-icon_visible');
+			let isCartIconVisible = cartIcon.elem.classList.contains('cart-icon_visible');
 
-      expect(isCartIconVisible).toBe(true);
-    });
+			expect(isCartIconVisible).toBe(true);
+		});
 
-    describe('если пользователь прокрутил до конца страницы ', () => {
+		describe('если пользователь прокрутил до конца страницы ', () => {
+			describe('ecли вокруг основного контейнера есть место для иконки', () => {
+				beforeEach(() => {
+					viewport.set(1920, 1080);
 
-      describe('ecли вокруг основного контейнера есть место для иконки', () => {
-        beforeEach(() => {
-          viewport.set(1920, 1080);
+					cartIcon.update(cart);
 
-          cartIcon.update(cart);
+					window.scrollTo(0, document.documentElement.scrollHeight);
+				});
 
-          window.scrollTo(0, document.documentElement.scrollHeight);
-        });
+				it('иконка должна быть спозиционирована фиксированно', (done) => {
+					setTimeout(() => {
+						expect(getComputedStyle(cartIcon.elem).position).toBe('fixed');
 
-        it('иконка должна быть спозиционирована фиксированно', (done) => {
-          setTimeout(() => {
-            expect(getComputedStyle(cartIcon.elem).position).toBe('fixed');
+						done();
+					}, 100);
+				});
 
-            done();
-          }, 100);
-        });
+				it('иконка должна смещаться на 20px правее от первого элемент в документе с классом `container`', (done) => {
+					setTimeout(() => {
+						let actualLeftIndent = Math.round(cartIcon.elem.getBoundingClientRect().left);
+						let expectedLeftIndent =
+							Math.round(document.querySelector('.container').getBoundingClientRect().right) + 20;
 
-        it('иконка должна смещаться на 20px правее от первого элемент в документе с классом `container`', (done) => {
-          setTimeout(() => {
-            let actualLeftIndent = Math.round(cartIcon.elem.getBoundingClientRect().left);
-            let expectedLeftIndent = Math.round(document.querySelector('.container').getBoundingClientRect().right) + 20;
+						expect(`${actualLeftIndent}px`).toBe(`${expectedLeftIndent}px`);
 
-            expect(`${actualLeftIndent}px`).toBe(`${expectedLeftIndent}px`);
+						done();
+					}, 100);
+				});
+			});
 
-            done();
-          }, 100);
-        });
-      });
+			describe('ecли вокруг основного контейнера нет места для иконки', () => {
+				beforeEach(() => {
+					viewport.set(990, 1080);
 
-      describe('ecли вокруг основного контейнера нет места для иконки', () => {
-        beforeEach(() => {
-          viewport.set(990, 1080);
+					cartIcon.update(cart);
 
-          cartIcon.update(cart);
+					window.scrollTo(0, document.documentElement.scrollHeight);
+				});
 
-          window.scrollTo(0, document.documentElement.scrollHeight);
-        });
+				it('иконка должна быть спозиционирована фиксированно', (done) => {
+					setTimeout(() => {
+						expect(getComputedStyle(cartIcon.elem).position).toBe('fixed');
 
-        it('иконка должна быть спозиционирована фиксированно', (done) => {
-          setTimeout(() => {
-            expect(getComputedStyle(cartIcon.elem).position).toBe('fixed');
+						done();
+					}, 100);
+				});
 
-            done();
-          }, 100);
-        });
+				it('иконка должна смещаться на 10px левее главного контейнера', (done) => {
+					setTimeout(() => {
+						let actualLeftIndent = Math.round(cartIcon.elem.getBoundingClientRect().left);
+						let expectedLeftIndent = document.documentElement.clientWidth - cartIcon.elem.offsetWidth - 10;
 
-        it('иконка должна смещаться на 10px левее главного контейнера', (done) => {
-          setTimeout(() => {
+						expect(`${actualLeftIndent}px`).toBe(`${expectedLeftIndent}px`);
 
-            let actualLeftIndent = Math.round(cartIcon.elem.getBoundingClientRect().left);
-            let expectedLeftIndent = document.documentElement.clientWidth - cartIcon.elem.offsetWidth - 10;
+						done();
+					}, 100);
+				});
+			});
+		});
+	});
 
-            expect(`${actualLeftIndent}px`).toBe(`${expectedLeftIndent}px`);
+	describe('если корзина пустая', () => {
+		let cartIconElement;
 
-            done();
-          }, 100);
-        });
-      });
+		beforeEach(() => {
+			cart.isEmpty.and.returnValue(true);
+			cart.getTotalCount.and.returnValue(0);
+			cart.getTotalPrice.and.returnValue(0);
+			cartIconElement = document.body.querySelector('.cart-icon');
 
-    });
-  });
+			cartIcon.update(cart);
+		});
 
-  describe('если корзина пустая', () => {
-    let cartIconElement;
+		it('иконка корзины должна быть скрыта', () => {
+			cartIcon.update(cart);
 
-    beforeEach(() => {
-      cart.isEmpty.and.returnValue(true);
-      cart.getTotalCount.and.returnValue(0);
-      cart.getTotalPrice.and.returnValue(0);
-      cartIconElement = document.body.querySelector('.cart-icon');
+			let isCartIconVisible = cartIconElement.classList.contains('cart-icon_visible');
 
-      cartIcon.update(cart);
-    });
-
-    it('иконка корзины должна быть скрыта', () => {
-      cartIcon.update(cart);
-
-      let isCartIconVisible = cartIconElement.classList.contains('cart-icon_visible');
-
-      expect(isCartIconVisible).toBe(false);
-    });
-
-  });
-
+			expect(isCartIconVisible).toBe(false);
+		});
+	});
 });
